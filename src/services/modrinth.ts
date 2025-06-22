@@ -18,7 +18,7 @@ interface ModrinthProject {
   downloads: number;
   icon_url?: string;
   versions: string[];
-  followers: number;
+  follows: number;
   date_created: string;
   date_modified: string;
   latest_version?: string;

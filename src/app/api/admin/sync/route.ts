@@ -13,9 +13,8 @@ export async function POST() {
     const result = await syncService.syncModrinthModpacks();
     return NextResponse.json(result);
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Sync failed', details: message },
+      { error: 'Sync failed', details: error.message },
       { status: 500 }
     );
   }

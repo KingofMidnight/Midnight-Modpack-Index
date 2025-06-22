@@ -58,7 +58,7 @@ export class SyncService {
       return { success: true, count: syncedCount };
     } catch (error) {
       console.error('Sync failed:', error);
-      return { success: false, error: error instanceof Error ? error.message : String(error) };
+      return { success: false, error: error.message };
     }
   }
 }

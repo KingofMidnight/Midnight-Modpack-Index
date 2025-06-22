@@ -16,52 +16,52 @@ datasource db {
 
 // Basic schema for modpack indexing https://prismaliser.app
 model Platform {
-  id        String     @id @default(cuid())
-  name      String     @unique
-  baseUrl   String
+  id String @id @default(cuid())
+  name String @unique
+  baseUrl String
   modpacks  Modpack[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Modpack {
-  id          String   @id @default(cuid())
-  platformId  String
-  externalId  String   // ID from source platform
-  name        String
+  id String @id @default(cuid())
+  platformId String
+  externalId String   // ID from source platform
+  name String
   description String?
-  version     String?
+  version String?
   minecraftVersion String?
-  modLoader   String?
+  modLoader String?
   downloadCount Int?
   lastUpdated DateTime?
   
-  platform    Platform @relation(fields: [platformId], references: [id])
-  mods        ModpackMod[]
+  platform Platform @relation(fields: [platformId], references: [id])
+  mods ModpackMod[]
   
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   
   @@unique([platformId, externalId])
 }
 
 model Mod {
-  id          String @id @default(cuid())
-  name        String
-  slug        String
+  id String @id @default(cuid())
+  name String
+  slug String
   description String?
-  modpacks    ModpackMod[]
+  modpacks ModpackMod[]
   
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ModpackMod {
   modpackId String
-  modId     String
+  modId String
   
-  modpack   Modpack @relation(fields: [modpackId], references: [id])
-  mod       Mod     @relation(fields: [modId], references: [id])
+  modpack Modpack @relation(fields: [modpackId], references: [id])
+  mod Mod @relation(fields: [modId], references: [id])
   
   @@id([modpackId, modId])
 }

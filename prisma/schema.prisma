@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Basic schema for modpack indexing https://prismaliser.app
+model Platform {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  baseUrl   String
+  modpacks  Modpack[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Modpack {
+  id          String   @id @default(cuid())
+  platformId  String
+  externalId  String   // ID from source platform
+  name        String
+  description String?
+  version     String?
+  minecraftVersion String?
+  modLoader   String?
+  downloadCount Int?
+  lastUpdated DateTime?
+  
+  platform    Platform @relation(fields: [platformId], references: [id])
+  mods        ModpackMod[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([platformId, externalId])
+}
+
+model Mod {
+  id          String @id @default(cuid())
+  name        String
+  slug        String
+  description String?
+  modpacks    ModpackMod[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ModpackMod {
+  modpackId String
+  modId     String
+  
+  modpack   Modpack @relation(fields: [modpackId], references: [id])
+  mod       Mod     @relation(fields: [modId], references: [id])
+  
+  @@id([modpackId, modId])
+}
+

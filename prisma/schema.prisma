@@ -26,7 +26,7 @@ model Platform {
 model Modpack {
   id String @id @default(cuid())
   platformId String
-  externalId String   // ID from source platform
+  externalId String
   name String
   description String?
   version String?

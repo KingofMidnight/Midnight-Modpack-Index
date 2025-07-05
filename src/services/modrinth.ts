@@ -27,7 +27,7 @@ interface ModrinthProject {
 
 class ModrinthService {
   private baseUrl = 'https://api.modrinth.com/v2';
-  private userAgent = 'midnight-modpack-index/0.1.0 (github.com/KingofMidnight/Midnight-Modpack-Index)';
+  private userAgent = 'midnight-modpack-index/1.0.0';
 
   async searchProjects(params: ModrinthSearchParams = {}) {
     const searchParams = new URLSearchParams();

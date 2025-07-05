@@ -13,7 +13,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     authorized: async ({ auth }) => {
-      // Only allow authenticated users to access admin routes
       return !!auth;
     },
   },

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import QuickSearch from "@/components/QuickSearch";
 import PopularModpacks from "@/components/PopularModpacks";
 
@@ -13,22 +14,22 @@ export default function HomePage() {
             </div>
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-4">
-                <a href="/" className="text-white hover:text-purple-300 px-3 py-2 rounded-md text-sm font-medium">
+                <Link href="/" className="text-white hover:text-purple-300 px-3 py-2 rounded-md text-sm font-medium">
                   Home
-                </a>
-                <a href="/search" className="text-white hover:text-purple-300 px-3 py-2 rounded-md text-sm font-medium">
+                </Link>
+                <Link href="/search" className="text-white hover:text-purple-300 px-3 py-2 rounded-md text-sm font-medium">
                   Search
-                </a>
-                <a href="/admin" className="text-white hover:text-purple-300 px-3 py-2 rounded-md text-sm font-medium">
+                </Link>
+                <Link href="/admin" className="text-white hover:text-purple-300 px-3 py-2 rounded-md text-sm font-medium">
                   Admin
-                </a>
+                </Link>
               </div>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
+      {/* Rest of your component remains the same */}
       <div className="relative px-4 py-16 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="text-center">
           <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">
@@ -40,7 +41,6 @@ export default function HomePage() {
             Find the perfect pack for your playstyle with our advanced filtering system.
           </p>
           
-          {/* Search Bar */}
           <div className="mt-10 max-w-2xl mx-auto">
             <QuickSearch />
           </div>

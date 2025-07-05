@@ -5,7 +5,7 @@ interface ModrinthSearchParams {
   offset?: number;
   limit?: number;
 }
-
+/*
 interface ModrinthProject {
   project_id: string;
   slug: string;
@@ -23,7 +23,7 @@ interface ModrinthProject {
   date_modified: string;
   latest_version?: string;
   license: string;
-}
+} */
 
 class ModrinthService {
   private baseUrl = 'https://api.modrinth.com/v2';

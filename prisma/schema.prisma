@@ -1,67 +1,43 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
-// Basic schema for modpack indexing https://prismaliser.app
 model Platform {
-  id String @id @default(cuid())
-  name String @unique
-  baseUrl String
+  id        String    @id @default(cuid())
+  name      String    @unique @db.VarChar(50)
+  baseUrl   String    @db.VarChar(255)
+  createdAt DateTime  @default(now()) @db.Timestamp(0)
+  updatedAt DateTime  @updatedAt @db.Timestamp(0)
   modpacks  Modpack[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+
+  @@map("platforms")
 }
 
 model Modpack {
-  id String @id @default(cuid())
-  platformId String
-  externalId String
-  name String
-  description String?
-  version String?
-  minecraftVersion String?
-  modLoader String?
-  downloadCount Int?
-  lastUpdated DateTime?
-  
-  platform Platform @relation(fields: [platformId], references: [id])
-  mods ModpackMod[]
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
+  id               String    @id @default(cuid())
+  platformId       String
+  externalId       String    @db.VarChar(100)
+  name             String    @db.VarChar(200)
+  description      String?
+  version          String?   @db.VarChar(50)
+  minecraftVersion String?   @db.VarChar(20)
+  modLoader        String?   @db.VarChar(20)
+  downloadCount    Int?
+  followCount      Int?
+  lastUpdated      DateTime? @db.Timestamp(0)
+  iconUrl          String?   @db.VarChar(500)
+  author           String?   @db.VarChar(100)
+  createdAt        DateTime  @default(now()) @db.Timestamp(0)
+  updatedAt        DateTime  @updatedAt @db.Timestamp(0)
+  platform         Platform  @relation(fields: [platformId], references: [id], onDelete: Cascade)
+
   @@unique([platformId, externalId])
+  @@index([downloadCount])
+  @@index([lastUpdated])
+  @@map("modpacks")
 }
-
-model Mod {
-  id String @id @default(cuid())
-  name String
-  slug String
-  description String?
-  modpacks ModpackMod[]
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model ModpackMod {
-  modpackId String
-  modId String
-  
-  modpack Modpack @relation(fields: [modpackId], references: [id])
-  mod Mod @relation(fields: [modId], references: [id])
-  
-  @@id([modpackId, modId])
-}
-

@@ -1,0 +1,217 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { redirect } from 'next/navigation';
+
+interface DatabaseStatus {
+  status: string;
+  counts: {
+    platforms: number;
+    modpacks: number;
+    mods: number;
+    modpackMods: number;
+  };
+  data: {
+    platforms: any[];
+    recentModpacks: any[];
+  };
+}
+
+interface SyncResult {
+  success: boolean;
+  count?: number;
+  total?: number;
+  errors?: number;
+  error?: string;
+  errorDetails?: string[];
+  platform?: string;
+  timestamp?: string;
+}
+
+export default function AdminDashboard() {
+  const { data: session, status } = useSession();
+  const [dbStatus, setDbStatus] = useState<DatabaseStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<SyncResult | null>(null);
+
+  useEffect(() => {
+    if (status === 'loading') return;
+    if (!session) {
+      redirect('/api/auth/signin');
+    }
+    
+    fetchDatabaseStatus();
+  }, [session, status]);
+
+  const fetchDatabaseStatus = async () => {
+    try {
+      const response = await fetch('/api/admin/db-status');
+      const data = await response.json();
+      setDbStatus(data);
+    } catch (error) {
+      console.error('Failed to fetch database status:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSync = async () => {
+    setSyncing(true);
+    setSyncResult(null);
+    
+    try {
+      const response = await fetch('/api/admin/sync', {
+        method: 'POST',
+      });
+      const result = await response.json();
+      setSyncResult(result);
+      
+      // Refresh database status after sync
+      if (result.success) {
+        setTimeout(fetchDatabaseStatus, 1000);
+      }
+    } catch (error) {
+      setSyncResult({
+        success: false,
+        error: `Sync request failed: ${error.message}`
+      });
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-white">Loading admin dashboard...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-white mb-2">Admin Dashboard</h1>
+          <p className="text-gray-300">Manage your modpack database</p>
+        </div>
+
+        {/* Database Status */}
+        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-8">
+          <h2 className="text-xl font-semibold text-white mb-4">Database Status</h2>
+          
+          {dbStatus ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-purple-500/20 rounded-lg p-4">
+                <div className="text-2xl font-bold text-white">{dbStatus.counts.platforms}</div>
+                <div className="text-sm text-gray-300">Platforms</div>
+              </div>
+              <div className="bg-blue-500/20 rounded-lg p-4">
+                <div className="text-2xl font-bold text-white">{dbStatus.counts.modpacks}</div>
+                <div className="text-sm text-gray-300">Modpacks</div>
+              </div>
+              <div className="bg-green-500/20 rounded-lg p-4">
+                <div className="text-2xl font-bold text-white">{dbStatus.counts.mods}</div>
+                <div className="text-sm text-gray-300">Mods</div>
+              </div>
+              <div className="bg-yellow-500/20 rounded-lg p-4">
+                <div className="text-2xl font-bold text-white">{dbStatus.counts.modpackMods}</div>
+                <div className="text-sm text-gray-300">Relations</div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-red-400">Failed to load database status</div>
+          )}
+
+          {/* Recent Modpacks */}
+          {dbStatus?.data.recentModpacks && dbStatus.data.recentModpacks.length > 0 && (
+            <div>
+              <h3 className="text-lg font-medium text-white mb-3">Recent Modpacks</h3>
+              <div className="space-y-2">
+                {dbStatus.data.recentModpacks.map((modpack) => (
+                  <div key={modpack.id} className="bg-white/5 rounded-lg p-3">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="text-white font-medium">{modpack.name}</div>
+                        <div className="text-sm text-gray-400">
+                          {modpack.platform.name} • {modpack.downloadCount?.toLocaleString()} downloads
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {new Date(modpack.createdAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Sync Controls */}
+        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-8">
+          <h2 className="text-xl font-semibold text-white mb-4">Data Synchronization</h2>
+          
+          <div className="flex gap-4 mb-6">
+            <button
+              onClick={handleSync}
+              disabled={syncing}
+              className="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center gap-2"
+            >
+              {syncing ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Syncing...
+                </>
+              ) : (
+                'Sync Modrinth Data'
+              )}
+            </button>
+            
+            <button
+              onClick={fetchDatabaseStatus}
+              className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            >
+              Refresh Status
+            </button>
+          </div>
+
+          {/* Sync Results */}
+          {syncResult && (
+            <div className={`rounded-lg p-4 ${syncResult.success ? 'bg-green-500/20 border border-green-500/30' : 'bg-red-500/20 border border-red-500/30'}`}>
+              <h3 className={`font-medium ${syncResult.success ? 'text-green-300' : 'text-red-300'}`}>
+                {syncResult.success ? 'Sync Successful!' : 'Sync Failed'}
+              </h3>
+              
+              {syncResult.success ? (
+                <div className="text-sm text-white mt-2">
+                  <p>Synced {syncResult.count} out of {syncResult.total} modpacks from {syncResult.platform}</p>
+                  {syncResult.errors && syncResult.errors > 0 && (
+                    <p className="text-yellow-300">⚠️ {syncResult.errors} errors occurred</p>
+                  )}
+                  <p className="text-gray-300">Completed at: {syncResult.timestamp}</p>
+                </div>
+              ) : (
+                <div className="text-sm text-red-200 mt-2">
+                  <p>{syncResult.error}</p>
+                  {syncResult.errorDetails && (
+                    <details className="mt-2">
+                      <summary className="cursor-pointer">View Details</summary>
+                      <ul className="mt-1 ml-4 list-disc">
+                        {syncResult.errorDetails.map((error, index) => (
+                          <li key={index}>{error}</li>
+                        ))}
+                      </ul>
+                    </details>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

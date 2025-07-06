@@ -13,12 +13,10 @@ export async function GET() {
     // Test database connection
     await prisma.$connect();
 
-    // Get counts for each table
-    const [platformCount, modpackCount, modCount, modpackModCount] = await Promise.all([
+    // Get counts for existing tables only
+    const [platformCount, modpackCount] = await Promise.all([
       prisma.platform.count(),
-      prisma.modpack.count(),
-      prisma.mod.count(),
-      prisma.modpackMod.count()
+      prisma.modpack.count()
     ]);
 
     // Get sample data
@@ -34,8 +32,8 @@ export async function GET() {
       counts: {
         platforms: platformCount,
         modpacks: modpackCount,
-        mods: modCount,
-        modpackMods: modpackModCount
+        mods: 0, // No longer exists in schema
+        modpackMods: 0 // No longer exists in schema
       },
       data: {
         platforms,

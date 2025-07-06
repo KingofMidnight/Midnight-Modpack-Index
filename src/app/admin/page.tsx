@@ -103,7 +103,7 @@ export default function AdminDashboard() {
           <h2 className="text-xl font-semibold text-white mb-4">Database Status</h2>
           
           {dbStatus ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="bg-purple-500/20 rounded-lg p-4">
                 <div className="text-2xl font-bold text-white">{dbStatus.counts.platforms}</div>
                 <div className="text-sm text-gray-300">Platforms</div>
@@ -111,14 +111,6 @@ export default function AdminDashboard() {
               <div className="bg-blue-500/20 rounded-lg p-4">
                 <div className="text-2xl font-bold text-white">{dbStatus.counts.modpacks}</div>
                 <div className="text-sm text-gray-300">Modpacks</div>
-              </div>
-              <div className="bg-green-500/20 rounded-lg p-4">
-                <div className="text-2xl font-bold text-white">{dbStatus.counts.mods}</div>
-                <div className="text-sm text-gray-300">Mods</div>
-              </div>
-              <div className="bg-yellow-500/20 rounded-lg p-4">
-                <div className="text-2xl font-bold text-white">{dbStatus.counts.modpackMods}</div>
-                <div className="text-sm text-gray-300">Relations</div>
               </div>
             </div>
           ) : (

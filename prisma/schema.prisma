@@ -9,35 +9,30 @@ datasource db {
 
 model Platform {
   id        String    @id @default(cuid())
-  name      String    @unique @db.VarChar(50)
-  baseUrl   String    @db.VarChar(255)
-  createdAt DateTime  @default(now()) @db.Timestamp(0)
-  updatedAt DateTime  @updatedAt @db.Timestamp(0)
+  name      String    @unique
+  baseUrl   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   modpacks  Modpack[]
-
-  @@map("platforms")
 }
 
 model Modpack {
   id               String    @id @default(cuid())
   platformId       String
-  externalId       String    @db.VarChar(100)
-  name             String    @db.VarChar(200)
+  externalId       String
+  name             String
   description      String?
-  version          String?   @db.VarChar(50)
-  minecraftVersion String?   @db.VarChar(20)
-  modLoader        String?   @db.VarChar(20)
+  version          String?
+  minecraftVersion String?
+  modLoader        String?
   downloadCount    Int?
   followCount      Int?
-  lastUpdated      DateTime? @db.Timestamp(0)
-  iconUrl          String?   @db.VarChar(500)
-  author           String?   @db.VarChar(100)
-  createdAt        DateTime  @default(now()) @db.Timestamp(0)
-  updatedAt        DateTime  @updatedAt @db.Timestamp(0)
-  platform         Platform  @relation(fields: [platformId], references: [id], onDelete: Cascade)
+  iconUrl          String?
+  author           String?
+  lastUpdated      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  platform         Platform  @relation(fields: [platformId], references: [id])
 
   @@unique([platformId, externalId])
-  @@index([downloadCount])
-  @@index([lastUpdated])
-  @@map("modpacks")
 }

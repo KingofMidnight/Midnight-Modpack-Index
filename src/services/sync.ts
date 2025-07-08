@@ -2,8 +2,47 @@ import { prisma } from '@/lib/prisma';
 import { modrinthService } from './modrinth';
 import { curseforgeService } from './curseforge';
 
+interface SyncResult {
+  success: boolean;
+  count?: number;
+  total?: number;
+  errors?: number;
+  error?: string;
+  errorDetails?: string[];
+  platform?: string;
+  timestamp?: string;
+  stack?: string;
+  details?: any;
+}
+
+interface MultiPlatformSyncResult {
+  success: boolean;
+  platforms: number;
+  successfulPlatforms: number;
+  totalSynced: number;
+  results: SyncResult[];
+  timestamp: string;
+}
+
+interface PlatformStats {
+  name: string;
+  count: number;
+  lastUpdate: Date;
+}
+
+interface StatusResult {
+  platforms: number;
+  modpacks: number;
+  platformBreakdown: PlatformStats[];
+  lastSync: {
+    modpack: string;
+    platform: string;
+    updatedAt: Date;
+  } | null;
+}
+
 export class SyncService {
-  async syncModrinthModpacks(limit = 50) {
+  async syncModrinthModpacks(limit = 50): Promise<SyncResult> {
     console.log(`🚀 Starting Modrinth modpack sync (limit: ${limit})...`);
     
     try {
@@ -32,13 +71,14 @@ export class SyncService {
         return { 
           success: false, 
           error: 'No modpacks found from Modrinth API',
-          details: { searchResult }
+          details: { searchResult },
+          platform: 'Modrinth'
         };
       }
 
       let syncedCount = 0;
       let errorCount = 0;
-      const errors = [];
+      const errors: string[] = [];
 
       for (const [index, project] of searchResult.hits.entries()) {
         try {
@@ -84,13 +124,13 @@ export class SyncService {
           console.log(`✅ Synced: ${project.title}`);
         } catch (error) {
           errorCount++;
-          const errorMsg = `Failed to sync ${project.title}: ${error.message}`;
+          const errorMsg = `Failed to sync ${project.title}: ${error instanceof Error ? error.message : 'Unknown error'}`;
           console.error(`❌ ${errorMsg}`);
           errors.push(errorMsg);
         }
       }
 
-      const summary = {
+      const summary: SyncResult = {
         success: true,
         count: syncedCount,
         total: searchResult.hits.length,
@@ -108,19 +148,20 @@ export class SyncService {
       return summary;
 
     } catch (error) {
-      const errorMsg = `Sync failed: ${error.message}`;
+      const errorMsg = `Sync failed: ${error instanceof Error ? error.message : 'Unknown error'}`;
       console.error('💥', errorMsg);
       return { 
         success: false, 
         error: errorMsg,
-        stack: error.stack
+        stack: error instanceof Error ? error.stack : undefined,
+        platform: 'Modrinth'
       };
     } finally {
       await prisma.$disconnect();
     }
   }
 
-  async syncCurseForgeModpacks(limit = 50) {
+  async syncCurseForgeModpacks(limit = 50): Promise<SyncResult> {
     console.log(`🚀 Starting CurseForge modpack sync (limit: ${limit})...`);
     
     try {
@@ -149,13 +190,14 @@ export class SyncService {
         return { 
           success: false, 
           error: 'No modpacks found from CurseForge API',
-          details: { searchResult }
+          details: { searchResult },
+          platform: 'CurseForge'
         };
       }
 
       let syncedCount = 0;
       let errorCount = 0;
-      const errors = [];
+      const errors: string[] = [];
 
       for (const [index, modpack] of searchResult.data.entries()) {
         try {
@@ -206,13 +248,13 @@ export class SyncService {
           console.log(`✅ Synced: ${modpack.name}`);
         } catch (error) {
           errorCount++;
-          const errorMsg = `Failed to sync ${modpack.name}: ${error.message}`;
+          const errorMsg = `Failed to sync ${modpack.name}: ${error instanceof Error ? error.message : 'Unknown error'}`;
           console.error(`❌ ${errorMsg}`);
           errors.push(errorMsg);
         }
       }
 
-      const summary = {
+      const summary: SyncResult = {
         success: true,
         count: syncedCount,
         total: searchResult.data.length,
@@ -230,12 +272,13 @@ export class SyncService {
       return summary;
 
     } catch (error) {
-      const errorMsg = `CurseForge sync failed: ${error.message}`;
+      const errorMsg = `CurseForge sync failed: ${error instanceof Error ? error.message : 'Unknown error'}`;
       console.error('💥', errorMsg);
       return { 
         success: false, 
         error: errorMsg,
-        stack: error.stack
+        stack: error instanceof Error ? error.stack : undefined,
+        platform: 'CurseForge'
       };
     } finally {
       await prisma.$disconnect();
@@ -246,21 +289,21 @@ export class SyncService {
     // Extract mod loader from latest files or indexes
     const latestFileIndex = modpack.latestFilesIndexes?.[0];
     if (latestFileIndex?.modLoader) {
-      const loaderMap = {
+      const loaderMap: Record<number, string> = {
         1: 'Forge',
         4: 'Fabric',
         5: 'Quilt',
         6: 'NeoForge'
       };
-      return loaderMap[latestFileIndex.modLoader] || null;
+      return loaderMap[latestFileIndex.modLoader as number] || null;
     }
     return null;
   }
 
-  async syncAllPlatforms() {
+  async syncAllPlatforms(): Promise<MultiPlatformSyncResult> {
     console.log('🚀 Starting multi-platform sync...');
     
-    const results = [];
+    const results: SyncResult[] = [];
     
     // Sync Modrinth
     try {
@@ -270,7 +313,7 @@ export class SyncService {
       results.push({ 
         platform: 'Modrinth', 
         success: false, 
-        error: error.message 
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
 
@@ -282,7 +325,7 @@ export class SyncService {
       results.push({ 
         platform: 'CurseForge', 
         success: false, 
-        error: error.message 
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
 
@@ -299,7 +342,7 @@ export class SyncService {
     };
   }
 
-  async getStatus() {
+  async getStatus(): Promise<StatusResult> {
     try {
       const [platformCount, modpackCount] = await Promise.all([
         prisma.platform.count(),
@@ -334,7 +377,7 @@ export class SyncService {
         } : null
       };
     } catch (error) {
-      throw new Error(`Status check failed: ${error.message}`);
+      throw new Error(`Status check failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 }

@@ -3,7 +3,29 @@ import { prisma } from '@/lib/prisma';
 import { modrinthService } from '@/services/modrinth';
 import { curseforgeService } from '@/services/curseforge';
 
-export async function GET(request: NextRequest) {
+interface SearchResult {
+  project_id: string;
+  title: string;
+  description: string;
+  downloads: number;
+  follows: number;
+  icon_url?: string;
+  date_modified: string;
+  latest_version?: string;
+  author?: string;
+  platform: string;
+  mod_loader?: string;
+  categories: string[];
+}
+
+interface SearchResponse {
+  hits: SearchResult[];
+  total_hits: number;
+  offset: number;
+  limit: number;
+}
+
+export async function GET(request: NextRequest): Promise<NextResponse<SearchResponse | { error: string; details?: string }>> {
   try {
     const searchParams = request.nextUrl.searchParams;
     const query = searchParams.get('query') || '';
@@ -14,7 +36,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    let results = [];
+    let results: SearchResult[] = [];
     let totalHits = 0;
 
     if (platform === 'all' || platform === 'database') {
@@ -66,21 +88,22 @@ export async function GET(request: NextRequest) {
         prisma.modpack.count({ where: whereClause })
       ]);
 
-      results = dbResults.map(modpack => ({
+      const dbSearchResults: SearchResult[] = dbResults.map(modpack => ({
         project_id: modpack.externalId,
         title: modpack.name,
-        description: modpack.description,
+        description: modpack.description || '',
         downloads: modpack.downloadCount || 0,
         follows: modpack.followCount || 0,
-        icon_url: modpack.iconUrl,
+        icon_url: modpack.iconUrl || undefined,
         date_modified: modpack.lastUpdated?.toISOString() || modpack.updatedAt.toISOString(),
-        latest_version: modpack.minecraftVersion,
-        author: modpack.author,
+        latest_version: modpack.minecraftVersion || undefined,
+        author: modpack.author || undefined,
         platform: modpack.platform.name,
-        mod_loader: modpack.modLoader,
+        mod_loader: modpack.modLoader || undefined,
         categories: []
       }));
 
+      results = dbSearchResults;
       totalHits = dbCount;
     }
 
@@ -105,10 +128,19 @@ export async function GET(request: NextRequest) {
           index: sortBy === 'updated' ? 'updated' : 'downloads'
         });
 
-        const modrinthModpacks = modrinthResults.hits?.map((hit: any) => ({
-          ...hit,
+        const modrinthModpacks: SearchResult[] = modrinthResults.hits?.map((hit: any) => ({
+          project_id: hit.project_id,
+          title: hit.title,
+          description: hit.description || '',
+          downloads: hit.downloads || 0,
+          follows: hit.follows || 0,
+          icon_url: hit.icon_url,
+          date_modified: hit.date_modified,
+          latest_version: hit.latest_version,
+          author: hit.author,
           platform: 'Modrinth',
-          mod_loader: hit.loaders?.[0] || hit.loader
+          mod_loader: hit.loaders?.[0] || hit.loader,
+          categories: hit.categories || []
         })) || [];
 
         if (platform === 'modrinth') {
@@ -129,17 +161,17 @@ export async function GET(request: NextRequest) {
         
         const curseforgeResults = await curseforgeService.searchModpacks({
           searchFilter: query,
-          gameVersion: minecraftVersion,
+          gameVersion: minecraftVersion || undefined, // Convert null to undefined
           sortField,
           sortOrder: 'desc',
           pageSize: platform === 'curseforge' ? limit : Math.floor(limit / 2),
           index: offset
         });
 
-        const curseforgeModpacks = curseforgeResults.data?.map((modpack: any) => ({
+        const curseforgeModpacks: SearchResult[] = curseforgeResults.data?.map((modpack: any) => ({
           project_id: modpack.id.toString(),
           title: modpack.name,
-          description: modpack.summary,
+          description: modpack.summary || '',
           downloads: modpack.downloadCount || 0,
           follows: modpack.thumbsUpCount || 0,
           icon_url: modpack.logo?.thumbnailUrl || modpack.logo?.url,
@@ -147,7 +179,7 @@ export async function GET(request: NextRequest) {
           latest_version: modpack.latestFiles?.[0]?.gameVersions?.[0],
           author: modpack.authors?.[0]?.name,
           platform: 'CurseForge',
-          mod_loader: this.getModLoaderFromCurseForge(modpack),
+          mod_loader: getModLoaderFromCurseForge(modpack),
           categories: modpack.categories?.map((cat: any) => cat.name) || []
         })) || [];
 
@@ -165,7 +197,7 @@ export async function GET(request: NextRequest) {
 
     // Sort combined results if needed
     if (platform === 'all' && results.length > 0) {
-      results.sort((a, b) => {
+      results.sort((a: SearchResult, b: SearchResult) => {
         switch (sortBy) {
           case 'downloads':
             return (b.downloads || 0) - (a.downloads || 0);
@@ -189,22 +221,22 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Search error:', error);
     return NextResponse.json(
-      { error: 'Search failed', details: error.message },
+      { error: 'Search failed', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
 }
 
-function getModLoaderFromCurseForge(modpack: any): string | null {
+function getModLoaderFromCurseForge(modpack: any): string | undefined {
   const latestFileIndex = modpack.latestFilesIndexes?.[0];
   if (latestFileIndex?.modLoader) {
-    const loaderMap = {
+    const loaderMap: Record<number, string> = {
       1: 'Forge',
       4: 'Fabric',
       5: 'Quilt',
       6: 'NeoForge'
     };
-    return loaderMap[latestFileIndex.modLoader] || null;
+    return loaderMap[latestFileIndex.modLoader as number] || undefined;
   }
-  return null;
+  return undefined;
 }

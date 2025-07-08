@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { modrinthService } from '@/services/modrinth';
 import { curseforgeService } from '@/services/curseforge';
+import { getCachedData, setCachedData } from '@/lib/redis';
 
 interface SearchResult {
   project_id: string;
@@ -210,14 +211,18 @@ export async function GET(request: NextRequest): Promise<NextResponse<SearchResp
         }
       });
     }
-
-    return NextResponse.json({
-      hits: results.slice(0, limit),
+    
+    const results = {
+      hits: searchResults,
       total_hits: totalHits,
       offset,
       limit
-    });
+    };
 
+    // Cache results for 30 minutes
+    await setCachedData(cacheKey, results, 1800);
+
+    return NextResponse.json(results);
   } catch (error) {
     console.error('Search error:', error);
     return NextResponse.json(

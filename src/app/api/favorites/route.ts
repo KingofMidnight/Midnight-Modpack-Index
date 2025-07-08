@@ -2,7 +2,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(request: NextRequest) {
+interface FavoriteModpack {
+  id: string;
+  name: string;
+  description: string | null;
+  downloadCount: number | null;
+  platform: string;
+  iconUrl: string | null;
+  favoriteId: string;
+  favoritedAt: Date;
+}
+
+interface FavoriteResponse {
+  favorites: FavoriteModpack[];
+}
+
+export async function GET(request: NextRequest): Promise<NextResponse<FavoriteResponse | { error: string }>> {
   const session = await auth();
   
   if (!session?.user?.email) {
@@ -24,7 +39,7 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    const favorites = user?.favorites.map(fav => ({
+    const favorites: FavoriteModpack[] = user?.favorites.map((fav: any) => ({
       id: fav.modpack.id,
       name: fav.modpack.name,
       description: fav.modpack.description,
@@ -37,6 +52,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ favorites });
   } catch (error) {
+    console.error('Failed to fetch favorites:', error);
     return NextResponse.json(
       { error: 'Failed to fetch favorites' },
       { status: 500 }
@@ -44,7 +60,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse<{ success: boolean; favoriteId?: string } | { error: string }>> {
   const session = await auth();
   
   if (!session?.user?.email) {
@@ -72,8 +88,9 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, favoriteId: favorite.id });
-  } catch (error) {
-    if (error.code === 'P2002') {
+  } catch (error: any) {
+    console.error('Failed to add favorite:', error);
+    if (error?.code === 'P2002') {
       return NextResponse.json(
         { error: 'Already in favorites' },
         { status: 409 }

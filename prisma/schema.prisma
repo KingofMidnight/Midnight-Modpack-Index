@@ -8,70 +8,72 @@ datasource db {
 }
 
 model Platform {
-  id        String    @id @default(cuid())
-  name      String    @unique
+  id        String     @id @default(cuid())
+  name      String     @unique
   baseUrl   String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
   modpacks  Modpack[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
 
 model Modpack {
-  id               String         @id @default(cuid())
-  platformId       String
-  externalId       String
-  name             String
-  description      String?
-  version          String?
+  id          String   @id @default(cuid())
+  platformId  String
+  externalId  String
+  name        String
+  description String?
+  version     String?
   minecraftVersion String?
-  modLoader        String?
-  downloadCount    Int?
-  followCount      Int?
-  iconUrl          String?
-  author           String?
-  lastUpdated      DateTime?
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-  platform         Platform       @relation(fields: [platformId], references: [id])
-  UserFavorite     UserFavorite[]
-
+  modLoader   String?
+  downloadCount Int?
+  followCount Int?
+  lastUpdated DateTime?
+  iconUrl     String?
+  author      String?
+  
+  platform    Platform @relation(fields: [platformId], references: [id])
+  favorites   UserFavorite[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
   @@unique([platformId, externalId])
 }
 
 model User {
-  id          String           @id @default(cuid())
-  email       String           @unique
-  name        String?
-  image       String?
-  favorites   UserFavorite[]
+  id        String     @id @default(cuid())
+  email     String     @unique
+  name      String?
+  image     String?
+  favorites UserFavorite[]
   preferences UserPreference[]
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
 
 model UserFavorite {
-  id        String @id @default(cuid())
+  id        String   @id @default(cuid())
   userId    String
   modpackId String
-
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  modpack Modpack @relation(fields: [modpackId], references: [id], onDelete: Cascade)
-
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  modpack   Modpack  @relation(fields: [modpackId], references: [id], onDelete: Cascade)
+  
   createdAt DateTime @default(now())
-
+  
   @@unique([userId, modpackId])
 }
 
 model UserPreference {
-  id     String @id @default(cuid())
-  userId String
-  key    String // e.g., "preferred_loader", "minecraft_version"
-  value  String // e.g., "Forge", "1.20.1"
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  id        String   @id @default(cuid())
+  userId    String
+  key       String   // e.g., "preferred_loader", "minecraft_version"
+  value     String   // e.g., "Forge", "1.20.1"
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
+  
   @@unique([userId, key])
 }

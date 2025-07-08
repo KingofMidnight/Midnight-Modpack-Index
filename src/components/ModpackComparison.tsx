@@ -19,6 +19,12 @@ interface ComparisonModpack {
   iconUrl?: string;
   mods?: string[];
   categories: string[];
+  [key: string]: any; // Index signature for dynamic access
+}
+
+interface ComparisonField {
+  key: keyof ComparisonModpack;
+  label: string;
 }
 
 export default function ModpackComparison({ modpackIds, onClose }: ModpackComparisonProps) {
@@ -57,13 +63,35 @@ export default function ModpackComparison({ modpackIds, onClose }: ModpackCompar
     );
   }
 
-  const comparisonFields = [
+  const comparisonFields: ComparisonField[] = [
     { key: 'platform', label: 'Platform' },
     { key: 'minecraftVersion', label: 'Minecraft Version' },
     { key: 'modLoader', label: 'Mod Loader' },
     { key: 'downloadCount', label: 'Downloads' },
     { key: 'categories', label: 'Categories' },
   ];
+
+  const renderFieldValue = (modpack: ComparisonModpack, field: ComparisonField) => {
+    const value = modpack[field.key];
+    
+    if (field.key === 'categories' && Array.isArray(value)) {
+      return (
+        <div className="categories-list">
+          {value.map((category: string) => (
+            <span key={category} className="category-tag">
+              {category}
+            </span>
+          ))}
+        </div>
+      );
+    }
+    
+    if (field.key === 'downloadCount' && typeof value === 'number') {
+      return value.toLocaleString();
+    }
+    
+    return value || 'N/A';
+  };
 
   return (
     <div className="comparison-modal">
@@ -106,19 +134,7 @@ export default function ModpackComparison({ modpackIds, onClose }: ModpackCompar
                 </div>
                 {modpacks.map((modpack) => (
                   <div key={modpack.id} className="comparison-cell">
-                    {field.key === 'categories' ? (
-                      <div className="categories-list">
-                        {modpack.categories.map((category) => (
-                          <span key={category} className="category-tag">
-                            {category}
-                          </span>
-                        ))}
-                      </div>
-                    ) : field.key === 'downloadCount' ? (
-                      modpack[field.key]?.toLocaleString()
-                    ) : (
-                      modpack[field.key] || 'N/A'
-                    )}
+                    {renderFieldValue(modpack, field)}
                   </div>
                 ))}
               </div>

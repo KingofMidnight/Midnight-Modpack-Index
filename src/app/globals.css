@@ -829,3 +829,147 @@ nav {
 .animate-fade-in {
   animation: fadeIn 0.6s ease-out;
 }
+
+/* Comparison Modal Styles */
+.comparison-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.comparison-content {
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.comparison-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.close-button {
+  color: rgb(156, 163, 175);
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.comparison-table {
+  overflow: auto;
+  flex: 1;
+  padding: 1rem;
+}
+
+.comparison-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.comparison-row {
+  display: grid;
+  grid-template-columns: 200px repeat(auto-fit, minmax(250px, 1fr));
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.comparison-cell {
+  padding: 1rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.comparison-cell:last-child {
+  border-right: none;
+}
+
+.field-label {
+  background: rgba(147, 51, 234, 0.2);
+  color: rgb(196, 181, 253);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.modpack-header {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+  background: rgba(147, 51, 234, 0.1);
+}
+
+.modpack-name {
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.description-cell {
+  align-items: flex-start;
+}
+
+.description-text {
+  color: rgb(156, 163, 175);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.categories-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.category-tag {
+  background: rgba(147, 51, 234, 0.2);
+  color: rgb(196, 181, 253);
+  padding: 0.125rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .comparison-modal {
+    padding: 1rem;
+  }
+  
+  .comparison-row {
+    grid-template-columns: 150px 1fr;
+  }
+  
+  .modpack-header {
+    flex-direction: row;
+    justify-content: flex-start;
+  }
+}

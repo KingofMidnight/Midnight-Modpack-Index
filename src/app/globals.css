@@ -395,3 +395,437 @@ nav {
     align-items: flex-start;
   }
 }
+
+/* Enhanced Modpack Card Styles */
+.modpack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.modpack-card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 1.5rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+}
+
+.modpack-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(147, 51, 234, 0.5), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.modpack-card:hover::before {
+  transform: translateX(100%);
+}
+
+.modpack-card:hover {
+  transform: translateY(-8px);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(147, 51, 234, 0.4);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(147, 51, 234, 0.1),
+    0 0 50px rgba(147, 51, 234, 0.1);
+}
+
+.modpack-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.modpack-icon-wrapper {
+  flex-shrink: 0;
+}
+
+.modpack-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.modpack-card:hover .modpack-icon {
+  border-color: rgba(147, 51, 234, 0.4);
+  transform: scale(1.05);
+}
+
+.modpack-icon-placeholder {
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.modpack-card:hover .modpack-icon-placeholder {
+  border-color: rgba(147, 51, 234, 0.4);
+  background: rgba(147, 51, 234, 0.1);
+}
+
+.modpack-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+.platform-badge {
+  background: rgba(0, 150, 136, 0.2);
+  color: rgb(77, 208, 225);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid rgba(0, 150, 136, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.loader-badge {
+  background: rgba(251, 146, 60, 0.2);
+  color: rgb(251, 146, 60);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid rgba(251, 146, 60, 0.3);
+  text-transform: capitalize;
+}
+
+.modpack-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.modpack-title {
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.3s ease;
+}
+
+.modpack-card:hover .modpack-title {
+  color: rgb(196, 181, 253);
+}
+
+.modpack-author {
+  color: rgb(156, 163, 175);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: -0.25rem 0 0 0;
+  transition: color 0.3s ease;
+}
+
+.modpack-card:hover .modpack-author {
+  color: rgb(147, 51, 234);
+}
+
+.modpack-description {
+  color: rgb(156, 163, 175);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+
+.modpack-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.category-tag {
+  background: rgba(147, 51, 234, 0.2);
+  color: rgb(196, 181, 253);
+  padding: 0.25rem 0.75rem;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid rgba(147, 51, 234, 0.3);
+  transition: all 0.3s ease;
+}
+
+.category-tag:hover {
+  background: rgba(147, 51, 234, 0.3);
+  color: white;
+}
+
+.modpack-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgb(156, 163, 175);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.modpack-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modpack-timestamp {
+  flex: 1;
+}
+
+.last-updated {
+  color: rgb(107, 114, 128);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.view-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(147, 51, 234, 0.2);
+  color: rgb(196, 181, 253);
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(147, 51, 234, 0.3);
+}
+
+.view-button:hover {
+  background: rgba(147, 51, 234, 0.4);
+  color: white;
+  border-color: rgba(147, 51, 234, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(147, 51, 234, 0.3);
+}
+
+/* Loading Skeleton Styles */
+.loading-skeleton {
+  pointer-events: none;
+}
+
+.skeleton-icon,
+.skeleton-meta,
+.skeleton-title,
+.skeleton-author,
+.skeleton-description,
+.skeleton-categories,
+.skeleton-stats,
+.skeleton-timestamp,
+.skeleton-button {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+.skeleton-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+}
+
+.skeleton-meta {
+  width: 80px;
+  height: 20px;
+}
+
+.skeleton-title {
+  width: 100%;
+  height: 24px;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-author {
+  width: 60%;
+  height: 16px;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-description {
+  width: 100%;
+  height: 60px;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-categories {
+  width: 80%;
+  height: 20px;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-stats {
+  width: 100%;
+  height: 20px;
+}
+
+.skeleton-timestamp {
+  width: 80px;
+  height: 16px;
+}
+
+.skeleton-button {
+  width: 120px;
+  height: 36px;
+  border-radius: 12px;
+}
+
+@keyframes skeleton-loading {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Error State Styles */
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 2rem;
+}
+
+.error-icon {
+  margin-bottom: 1rem;
+}
+
+.error-title {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.error-message {
+  color: rgb(156, 163, 175);
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.retry-button {
+  background: rgba(147, 51, 234, 0.2);
+  color: rgb(196, 181, 253);
+  border: 1px solid rgba(147, 51, 234, 0.3);
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.retry-button:hover {
+  background: rgba(147, 51, 234, 0.3);
+  color: white;
+  border-color: rgba(147, 51, 234, 0.5);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .modpack-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .modpack-card {
+    padding: 1.25rem;
+  }
+  
+  .modpack-card-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .modpack-meta {
+    flex-direction: row;
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .modpack-stats {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .modpack-footer {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .view-button {
+    justify-content: center;
+  }
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
